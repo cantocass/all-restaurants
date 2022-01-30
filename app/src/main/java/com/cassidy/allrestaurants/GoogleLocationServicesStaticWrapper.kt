@@ -6,7 +6,9 @@ import com.google.android.gms.location.LocationServices
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class GoogleLocationServicesStaticWrapper @Inject constructor(context: Context) {
-    private var fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
-}
+//@Singleton
+//class GoogleLocationServicesStaticWrapper @Inject constructor(context: Context) {
+//    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+//
+//    //            val location = staticWrapper.fusedLocationClient.lastLocation.result
+//}

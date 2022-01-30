@@ -1,9 +1,15 @@
 package com.cassidy.allrestaurants
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -30,9 +36,9 @@ import kotlin.coroutines.coroutineContext
 //Done
 //The app will use the Google Places API for its data source
 //Upon launch, the app will execute a search that displays NEARBY restaurants
+//Retrofit/OKHttp, Dagger/Hilt
 
 //Priorities
-//Retrofit/OKHttp, Dagger/Hilt
 //The app will prompt the user for permission to access their current location
 
 
@@ -56,17 +62,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val sydney = LatLng(-34.0, 151.0)
 
-
-    @Inject
-    lateinit var googlePlacesApi: GooglePlacesApi
-
-    @Inject
-    lateinit var locationServicesStaticWrapper: GoogleLocationServicesStaticWrapper
-
-
+    lateinit var viewModel: MapsActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,18 +73,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-       fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        viewModel = ViewModelProvider(this)[MapsActivityViewModel::class.java]
 
-//        lifecycleScope.launch {
-//            Log.d("request", "Starting Request")
-//            val response = googlePlacesApi.getNearbyPlace("${sydney.latitude},${sydney.longitude}")
-//            Log.d("request", "result = ${response.results.size}")
-//        }
+        checkHasLocationPermission()
+
+
+
+
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+
+        viewModel.fetchData(sydney)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        viewModel.observableState.observe(this) {
+            //todo create binding model, bind, update ui
+        }
     }
 
     /**
@@ -105,5 +115,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    }
+
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//    }
+
+    private fun checkHasLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            viewModel.onUserUpdatesLocationPermission(true)
+        } else {
+            val requestPermissionLauncher =
+                registerForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted: Boolean ->
+                    if (isGranted) {
+                        // Permission is granted. Continue the action or workflow in your
+                        // app.
+                        viewModel.onUserUpdatesLocationPermission(true)
+                    } else {
+                        viewModel.onUserUpdatesLocationPermission(false)
+                        // Explain to the user that the feature is unavailable because the
+                        // features requires a permission that the user has denied. At the
+                        // same time, respect the user's decision. Don't link to system
+                        // settings in an effort to convince the user to change their
+                        // decision.
+                    }
+                }
+
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
     }
 }
