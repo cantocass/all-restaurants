@@ -2,6 +2,7 @@ package com.cassidy.allrestaurants
 
 import android.annotation.SuppressLint
 import android.os.Looper
+import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -14,9 +15,12 @@ class GoogleLocationServicesStaticWrapper @Inject constructor(private val fusedL
 
     @SuppressLint("MissingPermission")
     fun initiateUserLocationRequest(callback: (LocationResult) -> Unit) {
+        Log.d("locationDebug", "initiateUserLocationRequest()")
+
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 super.onLocationResult(result)
+                Log.d("locationDebug", "locationResult = ${result.lastLocation.latitude}, ${result.lastLocation.longitude}")
                 callback.invoke(result)
             }
         }

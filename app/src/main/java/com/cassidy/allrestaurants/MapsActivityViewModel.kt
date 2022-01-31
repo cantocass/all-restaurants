@@ -1,5 +1,6 @@
 package com.cassidy.allrestaurants
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -20,6 +21,7 @@ class MapsActivityViewModel @Inject constructor(private val nearbyPlacesReposito
     val observableState : LiveData<ScreenState> = Transformations.distinctUntilChanged(liveState)
 
     fun fetchData() {
+        Log.d("locationDebug", "fetchData()")
         viewModelScope.launch {
 
             if (liveState.value!!.hasLocationPermission && liveState.value!!.location != null) {
@@ -34,19 +36,29 @@ class MapsActivityViewModel @Inject constructor(private val nearbyPlacesReposito
     }
 
     fun onUserUpdatesLocationPermission(hasLocationPermission: Boolean) {
+        Log.d("locationDebug", "onUserUpdatesLocationPermission()")
         liveState.value = stateFactory.updateStateWithLocationPermission(liveState.value!!, hasLocationPermission)
     }
 
     fun onRequestUserLocation(callback: (LocationResult) -> Unit) {
+        Log.d("locationDebug", "onRequestUserLocation()")
         googleLocationWrapper.initiateUserLocationRequest(callback)
     }
 
     fun onLocationReady(result: LocationResult) {
+        Log.d("locationDebug", "onLocationReady()")
+        val snapshotState = liveState.value!!
+        val newLocationState = stateFactory.updateStateWithLocationData(liveState.value!!,
+            LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude))
         liveState.value = stateFactory.updateStateWithLocationData(liveState.value!!,
             LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude))
+        if (snapshotState != newLocationState) {
+            fetchData()
+        }
     }
 
     fun onGoogleMapReady(googleMap: GoogleMap?) {
+        Log.d("locationDebug", "onGoogleMapReady()")
         liveState.value = stateFactory.updateStateWithGoogleMap(liveState.value!!, googleMap)
     }
 }
@@ -60,6 +72,12 @@ class ScreenStateFactory @Inject constructor() {
     fun createInitialState() = ScreenState(listOf(), false, null, null)
     fun updateStateWithPlaceList(currentState: ScreenState, updatedRestaurantsList: List<Place>) = currentState.copy(restaurantsList = updatedRestaurantsList)
     fun updateStateWithLocationPermission(currentState: ScreenState, updatedPermission: Boolean) = currentState.copy(hasLocationPermission = updatedPermission)
-    fun updateStateWithLocationData(currentState: ScreenState, updatedLocation: LatLngLiteral) = currentState.copy(location = updatedLocation)
+    fun updateStateWithLocationData(currentState: ScreenState, updatedLocation: LatLngLiteral): ScreenState {
+        //lose some accuracy to reduce model updates
+        val simpleLatitude = updatedLocation.lat.times(1000).toInt().toDouble().div(1000)
+        val simpleLongitude = updatedLocation.lng.times(1000).toInt().toDouble().div(1000)
+        val simpleLocation = LatLngLiteral(simpleLatitude, simpleLongitude)
+        return currentState.copy(location = simpleLocation)
+    }
     fun updateStateWithGoogleMap(currentState: ScreenState, updatedGoogleMap: GoogleMap?) = currentState.copy(googleMap = updatedGoogleMap)
 }

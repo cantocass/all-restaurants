@@ -13,16 +13,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.cassidy.allrestaurants.databinding.ActivityMapsBinding
-import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-
 
 //TODO
 //- Fragments or Jetpack Compose for UI, comprising at least two distinct screens (e.g. list/detail)
@@ -38,8 +34,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 //The app will prompt the user for permission to access their current location
 
 //Priorities
-//test out bad permission flow
+//The search results are displayed as pins on a map
 
+//test out bad permission flow
 
 //Required Features
 //A search feature will be included that allows the user to search for restaurants
@@ -56,7 +53,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 //Implement UI based on design requirements, UI Specifications, Assets
 //Your completed code should be shared with AllTrails via GitHub.
 
-@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCallback {
 
@@ -65,15 +61,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
 
     private lateinit var viewModel: MapsActivityViewModel
 
-    @Inject
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        Log.d("locationDebug", "onCreate()")
         viewModel = ViewModelProvider(this)[MapsActivityViewModel::class.java]
         checkHasLocationPermission()
         viewModel.onRequestUserLocation(this::onLocationReady)
@@ -91,21 +85,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
 
     override fun onStart() {
         super.onStart()
+        Log.d("locationDebug", "onStart()")
+
         viewModel.fetchData()
 
         viewModel.observableState.observe(this) {
-//            val location = LatLng(it.location?.lat ?: 0.0, it.location?.lng ?: 0.0)
-//            if (it.googleMap != null && it.location != null) {
-//            this.googleMap = it.googleMap
-//
-//                    googleMap.addMarker(
-//                MarkerOptions().position(location)
-//                    .title("Marker at ${location.latitude} and ${location.longitude}")
-//            )
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLng(location))
-//            }
+            Log.d("locationDebug", "observedScreenState = ${it.location?.lat}, ${it.location?.lng}, results[${it.restaurantsList.size}]")
 
-            //todo create binding model, bind, update ui
+            val userLocation = LatLng(it.location?.lat ?: 0.0, it.location?.lng ?: 0.0)
+            if (it.googleMap != null && it.location != null) {
+                this.googleMap = it.googleMap
+
+                it.restaurantsList.forEach { place: Place ->
+                    googleMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(
+                                LatLng(
+                                    place.geometry?.location?.lat ?: 0.0,
+                                    place.geometry?.location?.lng ?: 0.0
+                                )
+                            )
+                    )
+
+                }
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 11F))
+            }
+//            //todo create binding model, bind, update ui
         }
     }
 
@@ -116,10 +122,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        Log.d("locationDebug", "onMapReady()")
+
         viewModel.onGoogleMapReady(googleMap)
     }
 
     private fun checkHasLocationPermission() {
+        Log.d("locationDebug", "checkHasLocationPermission()")
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             viewModel.onUserUpdatesLocationPermission(true)
         } else {
@@ -139,6 +149,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
     }
 
     override fun onLocationReady(result: LocationResult) {
+        Log.d("locationDebug", "onLocationReady()")
+
         viewModel.onLocationReady(result)
     }
 }
