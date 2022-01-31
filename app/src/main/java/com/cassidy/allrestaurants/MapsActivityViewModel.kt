@@ -20,6 +20,8 @@ class MapsActivityViewModel @Inject constructor(private val nearbyPlacesReposito
     private var liveState : MutableLiveData<ScreenState> = MutableLiveData<ScreenState>(stateFactory.createInitialState())
     val observableState : LiveData<ScreenState> = Transformations.distinctUntilChanged(liveState)
 
+
+
     fun fetchData() {
         Log.d("locationDebug", "fetchData()")
         viewModelScope.launch {
@@ -60,6 +62,10 @@ class MapsActivityViewModel @Inject constructor(private val nearbyPlacesReposito
     fun onGoogleMapReady(googleMap: GoogleMap?) {
         Log.d("locationDebug", "onGoogleMapReady()")
         liveState.value = stateFactory.updateStateWithGoogleMap(liveState.value!!, googleMap)
+    }
+
+    fun onListButtonClick(navigationFunction: () -> Unit) {
+        navigationFunction.invoke()
     }
 }
 

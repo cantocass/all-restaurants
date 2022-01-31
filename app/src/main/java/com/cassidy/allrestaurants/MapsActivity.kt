@@ -73,9 +73,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
         checkHasLocationPermission()
         viewModel.onRequestUserLocation(this::onLocationReady)
 
-
-
-
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -120,6 +117,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        binding.listButton.setOnClickListener { viewModel.onListButtonClick(this::navigateToListFragment) }
+    }
+
     override fun onStop() {
         viewModel.observableState.removeObservers(this)
 
@@ -157,5 +160,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
         Log.d("locationDebug", "onLocationReady()")
 
         viewModel.onLocationReady(result)
+    }
+
+    private fun navigateToListFragment() {
+        val restaurantListFragment = RestaurantListFragment.newInstance(1)
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+
+        supportFragmentManager
+            .beginTransaction()
+            .remove(mapFragment)
+            .replace(R.id.container, restaurantListFragment)
+            .addToBackStack(RestaurantListFragment::javaClass.name)
+            .commit()
     }
 }
