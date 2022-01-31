@@ -1,4 +1,4 @@
-package com.cassidy.allrestaurants
+package com.cassidy.allrestaurants.common
 
 import android.annotation.SuppressLint
 import android.os.Looper

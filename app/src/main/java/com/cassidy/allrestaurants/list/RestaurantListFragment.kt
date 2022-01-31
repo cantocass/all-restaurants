@@ -2,12 +2,12 @@ package com.cassidy.allrestaurants.list
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.cassidy.allrestaurants.R
 import com.cassidy.allrestaurants.common.PlaceholderContent
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +29,7 @@ class RestaurantListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.layout_restaurant_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_list, container, false)
 
         // Set the adapter
         if (view is RecyclerView) {

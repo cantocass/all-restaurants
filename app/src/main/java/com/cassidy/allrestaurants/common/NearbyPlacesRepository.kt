@@ -1,8 +1,6 @@
 package com.cassidy.allrestaurants.common
 
 import android.util.Log
-import com.cassidy.allrestaurants.LatLngLiteral
-import com.cassidy.allrestaurants.Place
 import javax.inject.Inject
 import javax.inject.Singleton
 

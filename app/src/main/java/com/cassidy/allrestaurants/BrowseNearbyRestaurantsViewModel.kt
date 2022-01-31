@@ -6,7 +6,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cassidy.allrestaurants.common.GoogleLocationServicesStaticWrapper
+import com.cassidy.allrestaurants.common.LatLngLiteral
 import com.cassidy.allrestaurants.common.NearbyPlacesRepository
+import com.cassidy.allrestaurants.common.Place
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.GoogleMap
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,9 +17,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MapsActivityViewModel @Inject constructor(private val nearbyPlacesRepository: NearbyPlacesRepository,
-                                                private val googleLocationWrapper: GoogleLocationServicesStaticWrapper,
-                                                private val stateFactory: ScreenStateFactory): ViewModel() {
+class BrowseNearbyRestaurantsViewModel @Inject constructor(private val nearbyPlacesRepository: NearbyPlacesRepository,
+                                                           private val googleLocationWrapper: GoogleLocationServicesStaticWrapper,
+                                                           private val stateFactory: ScreenStateFactory): ViewModel() {
 
     private var liveState : MutableLiveData<ScreenState> = MutableLiveData<ScreenState>(stateFactory.createInitialState())
     val observableState : LiveData<ScreenState> = Transformations.distinctUntilChanged(liveState)
@@ -52,9 +55,11 @@ class MapsActivityViewModel @Inject constructor(private val nearbyPlacesReposito
         Log.d("locationDebug", "onLocationReady()")
         val snapshotState = liveState.value!!
         val newLocationState = stateFactory.updateStateWithLocationData(liveState.value!!,
-            LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude))
+            LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude)
+        )
         liveState.value = stateFactory.updateStateWithLocationData(liveState.value!!,
-            LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude))
+            LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude)
+        )
         if (snapshotState != newLocationState) {
             fetchData()
         }
