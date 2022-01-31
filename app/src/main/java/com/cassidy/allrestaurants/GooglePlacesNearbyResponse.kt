@@ -37,11 +37,11 @@ data class Bounds (
 
 data class LatLngLiteral(
 
-	@field:SerializedName("lng")
-	val lng: Double? = null,
-
 	@field:SerializedName("lat")
-	val lat: Double? = null
+	val lat: Double,
+
+	@field:SerializedName("lng")
+	val lng: Double
 )
 
 data class PlusCode(

@@ -1,8 +1,12 @@
 package com.cassidy.allrestaurants
 
+import android.content.Context
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -14,11 +18,15 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object GooglePlacesNetworkModule {
+object GoogleServicesModule {
 
-//    "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&keyword=cruise&key=YOUR_API_KEY")
-    const val BASE_URL = "https://maps.googleapis.com/maps/api/place/"
+    private const val BASE_URL = "https://maps.googleapis.com/maps/api/place/"
 
+    @Provides
+    @Singleton
+    fun provideFusedClient(@ApplicationContext context: Context): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
+    }
 
     @Provides
     @Named("googleMapsApi")

@@ -1,7 +1,6 @@
 package com.cassidy.allrestaurants
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,21 +9,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.cassidy.allrestaurants.databinding.ActivityMapsBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
 
 //TODO
 //- Fragments or Jetpack Compose for UI, comprising at least two distinct screens (e.g. list/detail)
@@ -37,9 +35,10 @@ import kotlin.coroutines.coroutineContext
 //The app will use the Google Places API for its data source
 //Upon launch, the app will execute a search that displays NEARBY restaurants
 //Retrofit/OKHttp, Dagger/Hilt
+//The app will prompt the user for permission to access their current location
 
 //Priorities
-//The app will prompt the user for permission to access their current location
+//test out bad permission flow
 
 
 //Required Features
@@ -57,76 +56,71 @@ import kotlin.coroutines.coroutineContext
 //Implement UI based on design requirements, UI Specifications, Assets
 //Your completed code should be shared with AllTrails via GitHub.
 
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCallback {
 
-    private lateinit var mMap: GoogleMap
+    private lateinit var googleMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
-    private val sydney = LatLng(-34.0, 151.0)
 
-    lateinit var viewModel: MapsActivityViewModel
+    private lateinit var viewModel: MapsActivityViewModel
+
+    @Inject
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        viewModel = ViewModelProvider(this)[MapsActivityViewModel::class.java]
+        checkHasLocationPermission()
+        viewModel.onRequestUserLocation(this::onLocationReady)
+
+
+
+
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[MapsActivityViewModel::class.java]
-
-        checkHasLocationPermission()
-
-
-
-
-
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-
-        viewModel.fetchData(sydney)
     }
 
     override fun onStart() {
         super.onStart()
+        viewModel.fetchData()
 
         viewModel.observableState.observe(this) {
+//            val location = LatLng(it.location?.lat ?: 0.0, it.location?.lng ?: 0.0)
+//            if (it.googleMap != null && it.location != null) {
+//            this.googleMap = it.googleMap
+//
+//                    googleMap.addMarker(
+//                MarkerOptions().position(location)
+//                    .title("Marker at ${location.latitude} and ${location.longitude}")
+//            )
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLng(location))
+//            }
+
             //todo create binding model, bind, update ui
         }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
+    override fun onStop() {
+        viewModel.observableState.removeObservers(this)
 
-        // Add a marker in Sydney and move the camera
-
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        super.onStop()
     }
 
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//    }
+    override fun onMapReady(googleMap: GoogleMap) {
+        viewModel.onGoogleMapReady(googleMap)
+    }
 
     private fun checkHasLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             viewModel.onUserUpdatesLocationPermission(true)
         } else {
             val requestPermissionLauncher =
@@ -134,20 +128,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     ActivityResultContracts.RequestPermission()
                 ) { isGranted: Boolean ->
                     if (isGranted) {
-                        // Permission is granted. Continue the action or workflow in your
-                        // app.
                         viewModel.onUserUpdatesLocationPermission(true)
                     } else {
                         viewModel.onUserUpdatesLocationPermission(false)
-                        // Explain to the user that the feature is unavailable because the
-                        // features requires a permission that the user has denied. At the
-                        // same time, respect the user's decision. Don't link to system
-                        // settings in an effort to convince the user to change their
-                        // decision.
                     }
                 }
 
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
+    }
+
+    override fun onLocationReady(result: LocationResult) {
+        viewModel.onLocationReady(result)
     }
 }
