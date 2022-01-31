@@ -1,6 +1,7 @@
 package com.cassidy.allrestaurants
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -83,6 +84,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
         mapFragment.getMapAsync(this)
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
         Log.d("locationDebug", "onStart()")
@@ -95,6 +97,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
             val userLocation = LatLng(it.location?.lat ?: 0.0, it.location?.lng ?: 0.0)
             if (it.googleMap != null && it.location != null) {
                 this.googleMap = it.googleMap
+                this.googleMap.isMyLocationEnabled = true
 
                 it.restaurantsList.forEach { place: Place ->
                     googleMap.addMarker(
@@ -106,6 +109,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnLocationReadyCal
                                     place.geometry?.location?.lng ?: 0.0
                                 )
                             )
+                            .snippet("${place.rating} stars by ${place.userRatingsTotal} ratings \n" +
+                                        "Price level: ${place.priceLevel} - ${place.businessStatus}")
                     )
 
                 }
