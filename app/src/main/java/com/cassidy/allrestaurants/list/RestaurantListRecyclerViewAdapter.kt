@@ -1,12 +1,11 @@
-package com.cassidy.allrestaurants
+package com.cassidy.allrestaurants.list
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-import com.cassidy.allrestaurants.placeholder.PlaceholderContent.PlaceholderItem
+import com.cassidy.allrestaurants.common.PlaceholderContent.PlaceholderItem
 import com.cassidy.allrestaurants.databinding.ItemRestaurantsBinding
 
 /**

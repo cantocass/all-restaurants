@@ -1,4 +1,4 @@
-package com.cassidy.allrestaurants
+package com.cassidy.allrestaurants.common
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

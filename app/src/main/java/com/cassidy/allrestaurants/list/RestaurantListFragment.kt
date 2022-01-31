@@ -1,4 +1,4 @@
-package com.cassidy.allrestaurants
+package com.cassidy.allrestaurants.list
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.cassidy.allrestaurants.placeholder.PlaceholderContent
+import com.cassidy.allrestaurants.R
+import com.cassidy.allrestaurants.common.PlaceholderContent
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

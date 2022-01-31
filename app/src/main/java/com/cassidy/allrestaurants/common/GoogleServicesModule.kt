@@ -1,6 +1,7 @@
-package com.cassidy.allrestaurants
+package com.cassidy.allrestaurants.common
 
 import android.content.Context
+import com.cassidy.allrestaurants.BuildConfig
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.Module
@@ -70,6 +71,7 @@ object GoogleServicesModule {
 
     @Singleton
     @Provides
-    fun provideGooglePlacesApi(retrofit: Retrofit): GooglePlacesApi = retrofit.create(GooglePlacesApi::class.java)
+    fun provideGooglePlacesApi(retrofit: Retrofit): GooglePlacesApi = retrofit.create(
+        GooglePlacesApi::class.java)
 
 }

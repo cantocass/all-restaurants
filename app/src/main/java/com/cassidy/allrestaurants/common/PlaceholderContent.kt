@@ -1,4 +1,4 @@
-package com.cassidy.allrestaurants.placeholder
+package com.cassidy.allrestaurants.common
 
 import java.util.ArrayList
 import java.util.HashMap
