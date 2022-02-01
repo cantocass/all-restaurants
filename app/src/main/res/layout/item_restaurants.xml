@@ -1,20 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/item_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+    <data>
+        <variable
+            name="model"
+            type="com.cassidy.allrestaurants.list.ItemRestaurantBindingModel" />
+    </data>
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
-</LinearLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/restaurant_image"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_launcher_background"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/restaurant_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{model.name}"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toEndOf="@id/restaurant_image"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            tools:text="My Favorite Restaurant"
+            />
+
+        <RatingBar
+            android:id="@+id/restaurant_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="24dp"
+            android:rating="@{model.rating}"
+            style="@style/Widget.AppCompat.RatingBar.Small"
+            app:layout_constraintTop_toBottomOf="@id/restaurant_name"
+            app:layout_constraintStart_toEndOf="@id/restaurant_image"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="8dp"
+            tools:rating="4.5" />
+
+        <TextView
+            android:id="@+id/restaurant_ratings_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@{model.ratingCountText}"
+            app:layout_constraintBottom_toBottomOf="@id/restaurant_rating"
+            app:layout_constraintStart_toEndOf="@id/restaurant_rating"
+            app:layout_constraintTop_toTopOf="@id/restaurant_rating"
+            tools:text="(134)" />
+
+        <TextView
+            android:id="@+id/restaurant_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/restaurant_image"
+            app:layout_constraintTop_toBottomOf="@id/restaurant_rating"
+            android:layout_marginStart="8dp"
+            android:text="@{model.price}"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            tools:text="$$$" />
+
+        <TextView
+            android:id="@+id/restaurant_price_supporting_spacer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/restaurant_price"
+            app:layout_constraintTop_toTopOf="@id/restaurant_price"
+            app:layout_constraintBottom_toBottomOf="@id/restaurant_price"
+            android:layout_marginStart="4dp"
+            android:text="·" />
+
+        <TextView
+            android:id="@+id/restaurant_supporting_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/restaurant_price_supporting_spacer"
+            app:layout_constraintTop_toTopOf="@id/restaurant_price_supporting_spacer"
+            app:layout_constraintBottom_toBottomOf="@id/restaurant_price_supporting_spacer"
+            android:layout_marginStart="4dp"
+            tools:text="Supporting Text" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

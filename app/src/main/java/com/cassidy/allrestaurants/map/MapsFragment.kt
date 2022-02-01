@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cassidy.allrestaurants.BrowseNearbyRestaurantsViewModel
 import com.cassidy.allrestaurants.common.OnLocationReadyCallback
@@ -33,15 +33,15 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModelBrowse: BrowseNearbyRestaurantsViewModel
+    private val browseViewModel by activityViewModels<BrowseNearbyRestaurantsViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Log.d("locationDebug", "onCreate()")
-        viewModelBrowse = ViewModelProvider(this)[BrowseNearbyRestaurantsViewModel::class.java]
+
         checkHasLocationPermission()
-        viewModelBrowse.onRequestUserLocation(this::onLocationReady)
+        browseViewModel.onRequestUserLocation(this::onLocationReady)
 
     }
 
@@ -56,7 +56,7 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
         mapFragment.getMapAsync{
                Log.d("locationDebug", "onMapReady()")
 
-            viewModelBrowse.onGoogleMapReady(it)
+            browseViewModel.onGoogleMapReady(it)
         }
     }
 
@@ -66,9 +66,9 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
 
         Log.d("locationDebug", "onStart()")
 
-        viewModelBrowse.fetchData()
+        browseViewModel.fetchData()
 
-        viewModelBrowse.observableState.observe(this) {
+        browseViewModel.observableState.observe(this) {
             Log.d("locationDebug", "observedScreenState = ${it.location?.lat}, ${it.location?.lng}, results[${it.restaurantsList.size}]")
 
             val userLocation = LatLng(it.location?.lat ?: 0.0, it.location?.lng ?: 0.0)
@@ -103,11 +103,11 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
     override fun onResume() {
         super.onResume()
 
-        binding.listButton.setOnClickListener { viewModelBrowse.onListButtonClick(this::navigateToListFragment) }
+        binding.listButton.setOnClickListener { browseViewModel.onListButtonClick(this::navigateToListFragment) }
     }
 
     override fun onStop() {
-        viewModelBrowse.observableState.removeObservers(this)
+        browseViewModel.observableState.removeObservers(this)
 
         super.onStop()
     }
@@ -139,16 +139,16 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
         Log.d("locationDebug", "checkHasLocationPermission()")
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            viewModelBrowse.onUserUpdatesLocationPermission(true)
+            browseViewModel.onUserUpdatesLocationPermission(true)
         } else {
             val requestPermissionLauncher =
                 registerForActivityResult(
                     ActivityResultContracts.RequestPermission()
                 ) { isGranted: Boolean ->
                     if (isGranted) {
-                        viewModelBrowse.onUserUpdatesLocationPermission(true)
+                        browseViewModel.onUserUpdatesLocationPermission(true)
                     } else {
-                        viewModelBrowse.onUserUpdatesLocationPermission(false)
+                        browseViewModel.onUserUpdatesLocationPermission(false)
                     }
                 }
 
@@ -159,7 +159,7 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
     override fun onLocationReady(result: LocationResult) {
         Log.d("locationDebug", "onLocationReady()")
 
-        viewModelBrowse.onLocationReady(result)
+        browseViewModel.onLocationReady(result)
     }
 
     private fun navigateToListFragment() {

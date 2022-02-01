@@ -1,61 +1,63 @@
 package com.cassidy.allrestaurants.list
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.cassidy.allrestaurants.R
-import com.cassidy.allrestaurants.common.PlaceholderContent
+import com.cassidy.allrestaurants.BrowseNearbyRestaurantsViewModel
+import com.cassidy.allrestaurants.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class RestaurantListFragment : Fragment() {
 
-    private var columnCount = 1
+    @Inject
+    lateinit var restaurantListAdapter: RestaurantListAdapter
+    private val browseViewModel by activityViewModels<BrowseNearbyRestaurantsViewModel>()
+
+    private var _binding: FragmentListBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        arguments?.let {
-            columnCount = it.getInt(ARG_COLUMN_COUNT)
-        }
+
+//        checkHasLocationPermission()
+//        viewModelBrowse.onRequestUserLocation(this::onLocationReady)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_list, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        _binding = FragmentListBinding.inflate(inflater)
 
-        // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = when {
-                    columnCount <= 1 -> LinearLayoutManager(context)
-                    else -> GridLayoutManager(context, columnCount)
-                }
-                adapter = RestaurantListRecyclerViewAdapter(PlaceholderContent.ITEMS)
+           with(binding.list) {
+                layoutManager = LinearLayoutManager(context)
+                adapter = restaurantListAdapter
             }
-        }
-        return view
+
+        return binding.root
     }
 
-    companion object {
+    override fun onStart() {
+        super.onStart()
 
-        // TODO: Customize parameter argument names
-        const val ARG_COLUMN_COUNT = "column-count"
+        browseViewModel.fetchData()
 
-        // TODO: Customize parameter initialization
-        @JvmStatic
-        fun newInstance(columnCount: Int) =
-            RestaurantListFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_COLUMN_COUNT, columnCount)
-                }
-            }
+        browseViewModel.observableState.observe(this) {
+            Log.d("locationDebug", "observedScreenState = ${it.location?.lat}, ${it.location?.lng}, results[${it.restaurantsList.size}]")
+
+
+            restaurantListAdapter.submitList(it.restaurantsList)
+        }
+
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
     }
 }

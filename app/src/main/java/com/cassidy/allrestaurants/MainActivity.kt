@@ -1,8 +1,10 @@
 package com.cassidy.allrestaurants
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.cassidy.allrestaurants.databinding.ActivityMainBinding
@@ -45,6 +47,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+
+    private val browseViewModel: BrowseNearbyRestaurantsViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
