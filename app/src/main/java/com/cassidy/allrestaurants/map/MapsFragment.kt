@@ -28,7 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MapsFragment : Fragment(), OnLocationReadyCallback {
+class MapsFragment : Fragment() {
 
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
@@ -39,9 +39,6 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
         super.onCreate(savedInstanceState)
 
         Log.d("locationDebug", "onCreate()")
-
-        checkHasLocationPermission()
-        browseViewModel.onRequestUserLocation(this::onLocationReady)
 
     }
 
@@ -65,8 +62,6 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
         super.onStart()
 
         Log.d("locationDebug", "onStart()")
-
-        browseViewModel.fetchData()
 
         browseViewModel.observableState.observe(this) {
             Log.d("locationDebug", "observedScreenState = ${it.location?.lat}, ${it.location?.lng}, results[${it.restaurantsList.size}]")
@@ -92,7 +87,6 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
                 }
                 it.googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 11F))
             }
-//            //todo create binding model, bind, update ui
         }
     }
 
@@ -129,38 +123,6 @@ class MapsFragment : Fragment(), OnLocationReadyCallback {
         super.onSaveInstanceState(outState)
     }
 
-//    override fun onMapReady(googleMap: GoogleMap) {
-//        Log.d("locationDebug", "onMapReady()")
-//
-//        viewModelBrowse.onGoogleMapReady(googleMap)
-//    }
-
-    private fun checkHasLocationPermission() {
-        Log.d("locationDebug", "checkHasLocationPermission()")
-
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            browseViewModel.onUserUpdatesLocationPermission(true)
-        } else {
-            val requestPermissionLauncher =
-                registerForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted: Boolean ->
-                    if (isGranted) {
-                        browseViewModel.onUserUpdatesLocationPermission(true)
-                    } else {
-                        browseViewModel.onUserUpdatesLocationPermission(false)
-                    }
-                }
-
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-    }
-
-    override fun onLocationReady(result: LocationResult) {
-        Log.d("locationDebug", "onLocationReady()")
-
-        browseViewModel.onLocationReady(result)
-    }
 
     private fun navigateToListFragment() {
         findNavController().navigate(R.id.action_mapFragment_to_listFragment)

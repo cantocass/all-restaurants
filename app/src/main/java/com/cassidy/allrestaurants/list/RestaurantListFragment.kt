@@ -7,8 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cassidy.allrestaurants.BrowseNearbyRestaurantsViewModel
+import com.cassidy.allrestaurants.R
 import com.cassidy.allrestaurants.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,10 +27,6 @@ class RestaurantListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-//        checkHasLocationPermission()
-//        viewModelBrowse.onRequestUserLocation(this::onLocationReady)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -39,13 +37,13 @@ class RestaurantListFragment : Fragment() {
                 adapter = restaurantListAdapter
             }
 
+        binding.mapButton.setOnClickListener { browseViewModel.onMapButtonClick(this::navigateToMapFragment) }
+
         return binding.root
     }
 
     override fun onStart() {
         super.onStart()
-
-        browseViewModel.fetchData()
 
         browseViewModel.observableState.observe(this) {
             Log.d("locationDebug", "observedScreenState = ${it.location?.lat}, ${it.location?.lng}, results[${it.restaurantsList.size}]")
@@ -59,5 +57,9 @@ class RestaurantListFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private fun navigateToMapFragment() {
+        findNavController().navigate(R.id.action_listFragment_to_mapFragment)
     }
 }

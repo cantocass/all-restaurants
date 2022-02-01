@@ -17,33 +17,40 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class BrowseNearbyRestaurantsViewModel @Inject constructor(private val nearbyPlacesRepository: NearbyPlacesRepository,
-                                                           private val googleLocationWrapper: GoogleLocationServicesStaticWrapper,
-                                                           private val stateFactory: ScreenStateFactory): ViewModel() {
+class BrowseNearbyRestaurantsViewModel @Inject constructor(
+    private val nearbyPlacesRepository: NearbyPlacesRepository,
+    private val googleLocationWrapper: GoogleLocationServicesStaticWrapper,
+    private val stateFactory: ScreenStateFactory
+) : ViewModel() {
 
-    private var liveState : MutableLiveData<ScreenState> = MutableLiveData<ScreenState>(stateFactory.createInitialState())
-    val observableState : LiveData<ScreenState> = Transformations.distinctUntilChanged(liveState)
-
+    private var liveState: MutableLiveData<ScreenState> =
+        MutableLiveData<ScreenState>(stateFactory.createInitialState())
+    val observableState: LiveData<ScreenState> = Transformations.distinctUntilChanged(liveState)
+    
+    private val currentState : ScreenState
+        get() = liveState.value!!
 
 
     fun fetchData() {
+        getNearbyRestaurants()
+//        checkHasLocationPermission()
+//        viewModelBrowse.onRequestUserLocation(this::onLocationReady)
+    }
+
+    fun getNearbyRestaurants() {
         Log.d("locationDebug", "fetchData()")
         viewModelScope.launch {
-
-            if (liveState.value!!.hasLocationPermission && liveState.value!!.location != null) {
-                val places = nearbyPlacesRepository.getNearbyRestaurants(liveState.value!!.location)
-                liveState.value = stateFactory.updateStateWithPlaceList(liveState.value!!, places)
-            } else {
-                //todo who knows
+            if (currentState.hasLocationPermission && currentState.location != null) {
+                val places = nearbyPlacesRepository.getNearbyRestaurants(currentState.location)
+                liveState.postValue(stateFactory.updateStateWithPlaceList(currentState, places))
             }
-
-
         }
     }
 
     fun onUserUpdatesLocationPermission(hasLocationPermission: Boolean) {
         Log.d("locationDebug", "onUserUpdatesLocationPermission()")
-        liveState.value = stateFactory.updateStateWithLocationPermission(liveState.value!!, hasLocationPermission)
+        liveState.value =
+            stateFactory.updateStateWithLocationPermission(currentState, hasLocationPermission)
     }
 
     fun onRequestUserLocation(callback: (LocationResult) -> Unit) {
@@ -53,11 +60,13 @@ class BrowseNearbyRestaurantsViewModel @Inject constructor(private val nearbyPla
 
     fun onLocationReady(result: LocationResult) {
         Log.d("locationDebug", "onLocationReady()")
-        val snapshotState = liveState.value!!
-        val newLocationState = stateFactory.updateStateWithLocationData(liveState.value!!,
+        val snapshotState = currentState
+        val newLocationState = stateFactory.updateStateWithLocationData(
+            currentState,
             LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude)
         )
-        liveState.value = stateFactory.updateStateWithLocationData(liveState.value!!,
+        liveState.value = stateFactory.updateStateWithLocationData(
+            currentState,
             LatLngLiteral(result.lastLocation.latitude, result.lastLocation.longitude)
         )
         if (snapshotState != newLocationState) {
@@ -67,29 +76,44 @@ class BrowseNearbyRestaurantsViewModel @Inject constructor(private val nearbyPla
 
     fun onGoogleMapReady(googleMap: GoogleMap?) {
         Log.d("locationDebug", "onGoogleMapReady()")
-        liveState.value = stateFactory.updateStateWithGoogleMap(liveState.value!!, googleMap)
+        liveState.value = stateFactory.updateStateWithGoogleMap(currentState, googleMap)
     }
 
     fun onListButtonClick(navigationFunction: () -> Unit) {
         navigationFunction.invoke()
     }
+
+    fun onMapButtonClick(navigationFunction: () -> Unit) {
+        navigationFunction.invoke()
+    }
 }
 
-data class ScreenState constructor(val restaurantsList: List<Place>,
-                                   val hasLocationPermission: Boolean,
-                                   val location: LatLngLiteral?,
-                                   val googleMap: GoogleMap?)
+data class ScreenState constructor(
+    val restaurantsList: List<Place>,
+    val hasLocationPermission: Boolean,
+    val location: LatLngLiteral?,
+    val googleMap: GoogleMap?
+)
 
 class ScreenStateFactory @Inject constructor() {
     fun createInitialState() = ScreenState(listOf(), false, null, null)
-    fun updateStateWithPlaceList(currentState: ScreenState, updatedRestaurantsList: List<Place>) = currentState.copy(restaurantsList = updatedRestaurantsList)
-    fun updateStateWithLocationPermission(currentState: ScreenState, updatedPermission: Boolean) = currentState.copy(hasLocationPermission = updatedPermission)
-    fun updateStateWithLocationData(currentState: ScreenState, updatedLocation: LatLngLiteral): ScreenState {
-        //lose some accuracy to reduce model updates
+    fun updateStateWithPlaceList(currentState: ScreenState, updatedRestaurantsList: List<Place>) =
+        currentState.copy(restaurantsList = updatedRestaurantsList)
+
+    fun updateStateWithLocationPermission(currentState: ScreenState, updatedPermission: Boolean) =
+        currentState.copy(hasLocationPermission = updatedPermission)
+
+    fun updateStateWithLocationData(
+        currentState: ScreenState,
+        updatedLocation: LatLngLiteral
+    ): ScreenState {
+        //lose some accuracy to reduce model update frequency
         val simpleLatitude = updatedLocation.lat.times(1000).toInt().toDouble().div(1000)
         val simpleLongitude = updatedLocation.lng.times(1000).toInt().toDouble().div(1000)
         val simpleLocation = LatLngLiteral(simpleLatitude, simpleLongitude)
         return currentState.copy(location = simpleLocation)
     }
-    fun updateStateWithGoogleMap(currentState: ScreenState, updatedGoogleMap: GoogleMap?) = currentState.copy(googleMap = updatedGoogleMap)
+
+    fun updateStateWithGoogleMap(currentState: ScreenState, updatedGoogleMap: GoogleMap?) =
+        currentState.copy(googleMap = updatedGoogleMap)
 }

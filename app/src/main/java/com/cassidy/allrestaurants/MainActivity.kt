@@ -1,13 +1,19 @@
 package com.cassidy.allrestaurants
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.cassidy.allrestaurants.common.OnLocationReadyCallback
 import com.cassidy.allrestaurants.databinding.ActivityMainBinding
+import com.google.android.gms.location.LocationResult
 import dagger.hilt.android.AndroidEntryPoint
 
 //TODO
@@ -23,9 +29,9 @@ import dagger.hilt.android.AndroidEntryPoint
 //Retrofit/OKHttp, Dagger/Hilt
 //The app will prompt the user for permission to access their current location
 //The search results are displayed as pins on a map
+//The user may choose to display the search results as a list, or as pins on a map
 
 //Priorities
-//The user may choose to display the search results as a list, or as pins on a map
 //A search feature will be included that allows the user to search for restaurants
 //The user may select a search result to display basic information about the restaurant
 
@@ -43,7 +49,7 @@ import dagger.hilt.android.AndroidEntryPoint
 //Your completed code should be shared with AllTrails via GitHub.
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
@@ -60,9 +66,40 @@ class MainActivity : AppCompatActivity() {
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
+
+        checkHasLocationPermission()
+        browseViewModel.onRequestUserLocation(this::onLocationReady)
+        browseViewModel.fetchData()
     }
 
     override fun onNavigateUp(): Boolean {
         return navController.navigateUp() || super.onNavigateUp()
+    }
+
+    private fun checkHasLocationPermission() {
+        Log.d("locationDebug", "checkHasLocationPermission()")
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            browseViewModel.onUserUpdatesLocationPermission(true)
+        } else {
+            val requestPermissionLauncher =
+                registerForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted: Boolean ->
+                    if (isGranted) {
+                        browseViewModel.onUserUpdatesLocationPermission(true)
+                    } else {
+                        browseViewModel.onUserUpdatesLocationPermission(false)
+                    }
+                }
+
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    override fun onLocationReady(result: LocationResult) {
+        Log.d("locationDebug", "onLocationReady()")
+
+        browseViewModel.onLocationReady(result)
     }
 }
