@@ -37,9 +37,9 @@ import dagger.hilt.android.AndroidEntryPoint
 //The app will prompt the user for permission to access their current location
 //The search results are displayed as pins on a map
 //The user may choose to display the search results as a list, or as pins on a map
+//A search feature will be included that allows the user to search for restaurants
 
 //Priorities
-//A search feature will be included that allows the user to search for restaurants
 //The user may select a search result to display basic information about the restaurant
 
 //test out bad permission flow
@@ -86,9 +86,6 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
         handleIntent(intent)
     }
 
-
-
-
     override fun onNavigateUp(): Boolean {
         return navController.navigateUp() || super.onNavigateUp()
     }
@@ -112,9 +109,9 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
     }
 
     private fun handleIntent(intent: Intent) {
-
         if (Intent.ACTION_SEARCH == intent.action) {
             val query = intent.getStringExtra(SearchManager.QUERY)
+            Log.d("searchDebug", "Text handled: $query")
             browseViewModel.onNewQuerySubmitted(query)
         }
     }
@@ -142,7 +139,6 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
 
     override fun onLocationReady(result: LocationResult) {
         Log.d("locationDebug", "onLocationReady()")
-
         browseViewModel.onLocationReady(result)
     }
 }
