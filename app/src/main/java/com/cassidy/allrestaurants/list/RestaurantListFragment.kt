@@ -27,6 +27,7 @@ class RestaurantListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -47,7 +48,6 @@ class RestaurantListFragment : Fragment() {
 
         browseViewModel.observableState.observe(this) {
             Log.d("locationDebug", "observedScreenState = ${it.location?.lat}, ${it.location?.lng}, results[${it.restaurantsList.size}]")
-
 
             restaurantListAdapter.submitList(it.restaurantsList)
         }

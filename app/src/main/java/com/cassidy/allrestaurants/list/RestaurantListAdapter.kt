@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.cassidy.allrestaurants.common.Place
 
-import com.cassidy.allrestaurants.databinding.ItemRestaurantsBinding
+import com.cassidy.allrestaurants.databinding.ItemRestaurantBinding
 import javax.inject.Inject
 
 class RestaurantListAdapter @Inject constructor() : ListAdapter<Place, PlaceItemViewHolder>(PlaceDiffCallback) {
@@ -20,13 +20,13 @@ class RestaurantListAdapter @Inject constructor() : ListAdapter<Place, PlaceItem
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaceItemViewHolder {
-        return PlaceItemViewHolder(ItemRestaurantsBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        return PlaceItemViewHolder(ItemRestaurantBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun onBindViewHolder(holder: PlaceItemViewHolder, position: Int) = holder.bind(getItem(position))
 }
 
-class PlaceItemViewHolder(private val binding: ItemRestaurantsBinding) : RecyclerView.ViewHolder(binding.root) {
+class PlaceItemViewHolder(private val binding: ItemRestaurantBinding) : RecyclerView.ViewHolder(binding.root) {
 
    fun bind(place: Place) {
        binding.model = ItemRestaurantBindingModel(place)

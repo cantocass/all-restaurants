@@ -2,10 +2,14 @@ package com.cassidy.allrestaurants
 
 import android.Manifest
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.widget.SearchView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -64,10 +68,11 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -79,12 +84,7 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
         browseViewModel.onRequestUserLocation(this::onLocationReady)
         browseViewModel.fetchData()
 
-//        if (Intent.ACTION_SEARCH == intent.action) {
-//            intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-////                doMySearch(query)
-//            }
-//        }
-
+        handleIntent(intent)
     }
 
 
@@ -92,6 +92,32 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
 
     override fun onNavigateUp(): Boolean {
         return navController.navigateUp() || super.onNavigateUp()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.options_menu, menu)
+
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        (menu.findItem(R.id.menu_search).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+            isIconifiedByDefault = false
+            isSubmitButtonEnabled = true
+        }
+
+        return true
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        handleIntent(intent)
+        super.onNewIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+
+        if (Intent.ACTION_SEARCH == intent.action) {
+            val query = intent.getStringExtra(SearchManager.QUERY)
+            browseViewModel.onNewQuerySubmitted(query)
+        }
     }
 
     private fun checkHasLocationPermission() {

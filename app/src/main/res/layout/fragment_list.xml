@@ -14,7 +14,7 @@
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".list.RestaurantListFragment"
-        tools:listitem="@layout/item_restaurants" />
+        tools:listitem="@layout/item_restaurant" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/map_button"

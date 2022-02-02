@@ -23,8 +23,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:foregroundServiceType="location"
-            android:label="@string/title_activity_main">
+            android:foregroundServiceType="location">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

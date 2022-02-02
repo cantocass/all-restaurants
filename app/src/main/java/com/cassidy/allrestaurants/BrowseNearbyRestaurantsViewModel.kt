@@ -86,6 +86,14 @@ class BrowseNearbyRestaurantsViewModel @Inject constructor(
     fun onMapButtonClick(navigationFunction: () -> Unit) {
         navigationFunction.invoke()
     }
+
+    fun onNewQuerySubmitted(query: String?) {
+        if (query == null) {
+            return
+        }
+
+
+    }
 }
 
 data class ScreenState constructor(
