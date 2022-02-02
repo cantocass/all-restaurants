@@ -1,6 +1,8 @@
 package com.cassidy.allrestaurants
 
 import android.Manifest
+import android.app.SearchManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.cassidy.allrestaurants.common.OnLocationReadyCallback
 import com.cassidy.allrestaurants.databinding.ActivityMainBinding
 import com.google.android.gms.location.LocationResult
@@ -59,7 +64,7 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -67,10 +72,23 @@ class MainActivity : AppCompatActivity(), OnLocationReadyCallback {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        binding.toolbar.setupWithNavController(navController, appBarConfiguration)
+
         checkHasLocationPermission()
         browseViewModel.onRequestUserLocation(this::onLocationReady)
         browseViewModel.fetchData()
+
+//        if (Intent.ACTION_SEARCH == intent.action) {
+//            intent.getStringExtra(SearchManager.QUERY)?.also { query ->
+////                doMySearch(query)
+//            }
+//        }
+
     }
+
+
+
 
     override fun onNavigateUp(): Boolean {
         return navController.navigateUp() || super.onNavigateUp()

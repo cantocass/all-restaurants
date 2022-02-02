@@ -1,26 +1,18 @@
 package com.cassidy.allrestaurants.map
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import androidx.fragment.app.Fragment
-
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cassidy.allrestaurants.BrowseNearbyRestaurantsViewModel
-import com.cassidy.allrestaurants.common.OnLocationReadyCallback
-import com.cassidy.allrestaurants.common.Place
 import com.cassidy.allrestaurants.R
+import com.cassidy.allrestaurants.common.Place
 import com.cassidy.allrestaurants.databinding.FragmentMapsBinding
-import com.google.android.gms.location.LocationResult
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
@@ -90,10 +82,6 @@ class MapsFragment : Fragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -110,19 +98,6 @@ class MapsFragment : Fragment() {
         _binding = null
         super.onDestroyView()
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-    }
-
 
     private fun navigateToListFragment() {
         findNavController().navigate(R.id.action_mapFragment_to_listFragment)
