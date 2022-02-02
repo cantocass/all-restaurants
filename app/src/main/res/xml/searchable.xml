@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
 android:label="AllRestaurants"
-android:hint="Search all nearby restaurants">
+android:hint="Search places">
 </searchable>
