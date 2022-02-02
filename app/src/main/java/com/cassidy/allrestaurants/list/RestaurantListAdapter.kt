@@ -27,15 +27,9 @@ class RestaurantListAdapter @Inject constructor() : ListAdapter<Place, PlaceItem
 }
 
 class PlaceItemViewHolder(private val binding: ItemRestaurantBinding) : RecyclerView.ViewHolder(binding.root) {
-
    fun bind(place: Place) {
        binding.model = ItemRestaurantBindingModel(place)
    }
-
-    override fun toString(): String {
-//            return super.toString() + " '" + contentView.text + "'"
-        return ""
-    }
 }
 
 data class ItemRestaurantBindingModel(private val place: Place) {

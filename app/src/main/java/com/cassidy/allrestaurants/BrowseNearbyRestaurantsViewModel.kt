@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cassidy.allrestaurants.common.GoogleLocationServicesStaticWrapper
+import com.cassidy.allrestaurants.common.GoogleLocationServicesWrapper
 import com.cassidy.allrestaurants.common.LatLngLiteral
 import com.cassidy.allrestaurants.common.NearbyPlacesRepository
 import com.cassidy.allrestaurants.common.Place
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BrowseNearbyRestaurantsViewModel @Inject constructor(
     private val nearbyPlacesRepository: NearbyPlacesRepository,
-    private val googleLocationWrapper: GoogleLocationServicesStaticWrapper,
+    private val googleLocationWrapper: GoogleLocationServicesWrapper,
     private val stateFactory: ScreenStateFactory
 ) : ViewModel() {
 

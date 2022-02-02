@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GoogleLocationServicesStaticWrapper @Inject constructor(private val fusedLocationClient: FusedLocationProviderClient) {
+class GoogleLocationServicesWrapper @Inject constructor(private val fusedLocationClient: FusedLocationProviderClient) {
 
     @SuppressLint("MissingPermission")
     fun initiateUserLocationRequest(callback: (LocationResult) -> Unit) {
